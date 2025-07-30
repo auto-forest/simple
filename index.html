@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>무심사 상담 신청</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #fff4dc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .form-card {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      padding: 32px 24px;
+      max-width: 420px;
+      width: 100%;
+    }
+
+    .form-card h1 {
+      font-size: 22px;
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .form-card p.subtitle {
+      text-align: center;
+      color: #6b7280;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .highlight span {
+      display: block;
+      background: #fef08a;
+      color: #b45309;
+      padding: 12px 18px;
+      font-size: 15px;
+      font-weight: 700;
+      border-radius: 12px;
+      border: 2px solid #facc15;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      margin-bottom: 24px;
+    }
+
+    form input,
+    form select,
+    form textarea {
+      width: 100%;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    form textarea {
+      resize: vertical;
+    }
+
+    .checkbox {
+      display: flex;
+      align-items: center;
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 16px;
+      gap: 6px;
+      line-height: 1.4;
+      flex-wrap: nowrap;
+      white-space: nowrap;
+    }
+
+    .checkbox input[type="checkbox"] {
+      flex-shrink: 0;
+      margin: 0;
+    }
+
+    button.submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: #f59e0b;
+      color: #fff;
+      font-size: 15px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button.submit-btn:hover {
+      background: #d97706;
+    }
+
+    @media (max-width: 480px) {
+      .form-card {
+        padding: 24px 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="form-card">
+    <h1>무심사 상담 신청</h1>
+    <p class="subtitle">1분이면 충분합니다. 부담없이 문의하세요!</p>
+
+    <div class="highlight">
+      <span>⭐ 신용등급 조회 없음 · 서류심사 없음 ⭐</span>
+    </div>
+
+    <form id="leadForm">
+      <input type="text" name="name" placeholder="이름을 입력해주세요" required />
+      <input type="tel" name="phone" id="phoneInput" placeholder="연락처 (010-0000-0000)" required />
+      <input type="text" name="carType" placeholder="희망 차종을 입력해주세요" />
+
+      <label for="status">현재 상황 (선택 사항)</label>
+      <select name="status" id="status">
+        <option value="">선택 안함</option>
+        <option>신용불량/금융채무불이행</option>
+        <option>연체중</option>
+        <option>개인회생/파산</option>
+        <option>무직</option>
+        <option>프리랜서</option>
+      </select>
+
+      <label for="message">문의사항 (선택 사항)</label>
+      <textarea name="message" id="message" rows="3" placeholder="궁금한 점이나 요청사항이 있으시면 작성해주세요"></textarea>
+
+      <label class="checkbox">
+        <input type="checkbox" id="agree" required />
+        <span>개인정보 수집 및 이용에 동의합니다 (필수)</span>
+      </label>
+
+      <button type="submit" class="submit-btn">무료 상담 신청하기</button>
+    </form>
+  </div>
+
+  <script>
+    const scriptURL = 'https://script.google.com/macros/s/여기에_Apps_Script_URL_입력/exec';
+    const form = document.getElementById('leadForm');
+    const phoneInput = document.getElementById('phoneInput');
+
+    // 전화번호 자동 하이픈 입력
+    phoneInput.addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\D/g, '');
+      let result = '';
+      if (value.length < 4) {
+        result = value;
+      } else if (value.length < 8) {
+        result = value.slice(0, 3) + '-' + value.slice(3);
+      } else {
+        result = value.slice(0, 3) + '-' + value.slice(3, 7) + '-' + value.slice(7, 11);
+      }
+      e.target.value = result;
+    });
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+
+      const agreeChecked = document.getElementById('agree').checked;
+      if (!agreeChecked) {
+        alert("개인정보 수집 및 이용에 동의해주세요.");
+        return;
+      }
+
+      const formData = new FormData(form);
+
+      fetch(scriptURL, { method: 'POST', body: formData })
+        .then(response => {
+          alert("신청이 접수되었습니다! 빠른 시일 내에 연락드리겠습니다.");
+          form.reset();
+        })
+        .catch(error => {
+          alert("전송 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+          console.error('Error!', error.message);
+        });
+    });
+  </script>
+</body>
+</html>
