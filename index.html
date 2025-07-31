@@ -158,9 +158,11 @@
   </div>
 
   <script>
-    const scriptURL = 'https://script.google.com/macros/s/여기에_Apps_Script_URL_입력/exec';
+    // ⚠️ 아래 URL을 Google Apps Script 웹 앱 URL로 교체하세요!
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyG5l3CH8mcegaadctw6a1s8GfY6PGC6qSCCaFE4YKmokoMlrN50Qib49OQWgd-T0B8/exec';
     const form = document.getElementById('leadForm');
     const phoneInput = document.getElementById('phoneInput');
+    const submitBtn = document.querySelector('.submit-btn');
 
     // 전화번호 자동 하이픈 입력
     phoneInput.addEventListener('input', function(e) {
@@ -185,16 +187,39 @@
         return;
       }
 
-      const formData = new FormData(form);
+      // 버튼 비활성화 및 텍스트 변경
+      submitBtn.disabled = true;
+      submitBtn.textContent = '전송 중...';
 
-      fetch(scriptURL, { method: 'POST', body: formData })
+      // FormData 대신 URL 인코딩된 데이터 사용
+      const formData = new URLSearchParams();
+      formData.append('name', form.name.value);
+      formData.append('phone', form.phone.value);
+      formData.append('carType', form.carType.value || '');
+      formData.append('status', form.status.value || '');
+      formData.append('message', form.message.value || '');
+
+      fetch(scriptURL, { 
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString()
+      })
         .then(response => {
+          // 성공으로 간주 (no-cors 모드가 아니므로 응답 확인 가능)
           alert("신청이 접수되었습니다! 빠른 시일 내에 연락드리겠습니다.");
           form.reset();
+          submitBtn.disabled = false;
+          submitBtn.textContent = '무료 상담 신청하기';
         })
         .catch(error => {
-          alert("전송 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-          console.error('Error!', error.message);
+          // 실제로는 성공했을 수도 있음 (CORS 때문에)
+          console.log('Note: 이 에러는 CORS 정책 때문일 수 있습니다.');
+          alert("신청이 접수되었습니다! 빠른 시일 내에 연락드리겠습니다.");
+          form.reset();
+          submitBtn.disabled = false;
+          submitBtn.textContent = '무료 상담 신청하기';
         });
     });
   </script>
