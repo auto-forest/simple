@@ -135,6 +135,11 @@
       background: #d97706;
     }
 
+    button.submit-btn:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
     @media (max-width: 480px) {
       .form-card {
         padding: 24px 18px;
@@ -157,9 +162,9 @@
     </div>
 
     <form id="leadForm">
-      <input type="text" name="name" placeholder="이름을 입력해주세요" required />
-      <input type="tel" name="phone" id="phoneInput" placeholder="연락처 (010-0000-0000)" required />
-      <input type="text" name="carType" placeholder="희망 차종을 입력해주세요" />
+      <input type="text" name="name" id="name" placeholder="이름을 입력해주세요" required />
+      <input type="tel" name="phone" id="phone" placeholder="연락처 (010-0000-0000)" required />
+      <input type="text" name="carType" id="carType" placeholder="희망 차종을 입력해주세요" />
 
       <label for="status">현재 상황 (선택 사항)</label>
       <select name="status" id="status">
@@ -193,8 +198,10 @@
   <script>
     // Google Apps Script 웹 앱 URL
     const scriptURL = 'https://script.google.com/macros/s/AKfycbxWOMx23HWnFS1TDi3634bMqjJ7SZ4Iwk8w8efgyCPt2Fz7Emk9pEwzhd1E5K7mAbI1/exec';
+    
+    // 폼 요소들 가져오기
     const form = document.getElementById('leadForm');
-    const phoneInput = document.getElementById('phoneInput');
+    const phoneInput = document.getElementById('phone');
     const submitBtn = document.querySelector('.submit-btn');
 
     // 전화번호 자동 하이픈 입력
@@ -211,9 +218,11 @@
       e.target.value = result;
     });
 
-    form.addEventListener('submit', e => {
+    // 폼 제출 처리
+    form.addEventListener('submit', async function(e) {
       e.preventDefault();
 
+      // 동의 체크 확인
       const agreeChecked = document.getElementById('agree').checked;
       if (!agreeChecked) {
         alert("개인정보 수집 및 이용에 동의해주세요.");
@@ -224,37 +233,68 @@
       submitBtn.disabled = true;
       submitBtn.textContent = '전송 중...';
 
-      // FormData 대신 URL 인코딩된 데이터 사용
-      const formData = new URLSearchParams();
-      formData.append('name', form.name.value);
-      formData.append('phone', form.phone.value);
-      formData.append('carType', form.carType.value || '');
-      formData.append('status', form.status.value || '');
-      formData.append('availableTime', form.availableTime.value || '');
-      formData.append('message', form.message.value || '');
+      // 각 필드 값 가져오기
+      const nameValue = document.getElementById('name').value;
+      const phoneValue = document.getElementById('phone').value;
+      const carTypeValue = document.getElementById('carType').value || '';
+      const statusValue = document.getElementById('status').value || '';
+      const availableTimeValue = document.getElementById('availableTime').value || '';
+      const messageValue = document.getElementById('message').value || '';
 
-      fetch(scriptURL, { 
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: formData.toString()
-      })
-        .then(response => {
-          // 성공으로 간주 (no-cors 모드가 아니므로 응답 확인 가능)
-          alert("신청이 접수되었습니다! 빠른 시일 내에 연락드리겠습니다.");
-          form.reset();
-          submitBtn.disabled = false;
-          submitBtn.textContent = '무료 상담 신청하기';
-        })
-        .catch(error => {
-          // 실제로는 성공했을 수도 있음 (CORS 때문에)
-          console.log('Note: 이 에러는 CORS 정책 때문일 수 있습니다.');
-          alert("신청이 접수되었습니다! 빠른 시일 내에 연락드리겠습니다.");
-          form.reset();
-          submitBtn.disabled = false;
-          submitBtn.textContent = '무료 상담 신청하기';
+      // 디버깅용 콘솔 로그
+      console.log('전송할 데이터:');
+      console.log('이름:', nameValue);
+      console.log('연락처:', phoneValue);
+      console.log('희망차종:', carTypeValue);
+      console.log('현재상황:', statusValue);
+      console.log('상담가능시간:', availableTimeValue);
+      console.log('문의사항:', messageValue);
+
+      // FormData 생성
+      const formData = new URLSearchParams();
+      formData.append('name', nameValue);
+      formData.append('phone', phoneValue);
+      formData.append('carType', carTypeValue);
+      formData.append('status', statusValue);
+      formData.append('availableTime', availableTimeValue);
+      formData.append('message', messageValue);
+
+      // 전송할 데이터 확인
+      console.log('FormData 내용:', formData.toString());
+
+      try {
+        const response = await fetch(scriptURL, { 
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: formData.toString()
         });
+
+        console.log('서버 응답:', response);
+        
+        // 성공 메시지
+        alert("신청이 접수되었습니다! 빠른 시일 내에 연락드리겠습니다.");
+        form.reset();
+        
+      } catch (error) {
+        console.error('전송 에러:', error);
+        // CORS 에러여도 대부분 성공한 것으로 처리
+        alert("신청이 접수되었습니다! 빠른 시일 내에 연락드리겠습니다.");
+        form.reset();
+        
+      } finally {
+        // 버튼 다시 활성화
+        submitBtn.disabled = false;
+        submitBtn.textContent = '무료 상담 신청하기';
+      }
+    });
+
+    // 페이지 로드 시 확인
+    window.addEventListener('DOMContentLoaded', function() {
+      console.log('페이지 로드 완료');
+      console.log('availableTime 필드 존재:', document.getElementById('availableTime') !== null);
+      console.log('Script URL:', scriptURL);
     });
   </script>
 </body>
