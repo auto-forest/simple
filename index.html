@@ -169,6 +169,15 @@
         <option value="소득증빙불가-프리랜서/무직/주부">소득증빙X(프리랜서, 무직, 주부 등)</option>
       </select>
 
+      <label for="availableTime">상담 가능한 시간 (선택 사항)</label>
+      <select name="availableTime" id="availableTime">
+        <option value="">선택 안함</option>
+        <option value="오전(9시~12시)">오전(9시~12시)</option>
+        <option value="오후(13시~17시)">오후(13시~17시)</option>
+        <option value="저녁(17시 이후)">저녁(17시 이후)</option>
+        <option value="언제든지 가능">언제든지 가능</option>
+      </select>
+
       <label for="message">문의사항 (선택 사항)</label>
       <textarea name="message" id="message" rows="3" placeholder="궁금한 점이나 요청사항이 있으시면 작성해주세요"></textarea>
 
@@ -221,6 +230,7 @@
       formData.append('phone', form.phone.value);
       formData.append('carType', form.carType.value || '');
       formData.append('status', form.status.value || '');
+      formData.append('availableTime', form.availableTime.value || '');
       formData.append('message', form.message.value || '');
 
       fetch(scriptURL, { 
