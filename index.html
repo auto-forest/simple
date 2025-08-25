@@ -214,14 +214,21 @@
         padding: 10px 12px;
       }
 
+      /* 모바일에서도 한 줄 유지, 너비와 간격 최적화 */
       .car-selection-group {
-        flex-direction: column;
-        gap: 12px;
+        gap: 6px;
       }
 
       .car-selection-group select {
-        flex: 1;
-        width: 100%;
+        width: 80px;
+        font-size: 13px;
+        padding: 12px 8px;
+        padding-right: 2rem;
+      }
+
+      .car-selection-group input {
+        font-size: 13px;
+        padding: 12px 10px;
       }
     }
   </style>
@@ -251,7 +258,7 @@
           <option value="신차">신차</option>
           <option value="중고차">중고차</option>
         </select>
-        <input type="text" name="carType" id="carType" placeholder="차종 입력 (예: 그랜저)" />
+        <input type="text" name="carType" id="carType" placeholder="차종명 (예: K5)" />
       </div>
 
       <label for="status">현재 상황 (선택 사항)</label>
