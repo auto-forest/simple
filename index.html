@@ -67,6 +67,14 @@
       }
     }
 
+    form label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: #374151;
+      font-weight: 500;
+    }
+
     form input[type="text"],
     form input[type="tel"],
     form select,
@@ -89,6 +97,23 @@
       background-position: right 0.7rem center;
       background-size: 1.2em;
       padding-right: 2.5rem;
+    }
+
+    /* 차종 선택 영역 스타일 */
+    .car-selection-group {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .car-selection-group select {
+      width: 100px;
+      margin-bottom: 14px;
+    }
+
+    .car-selection-group input {
+      flex: 1;
+      margin-bottom: 14px;
     }
 
     form textarea {
@@ -149,6 +174,16 @@
         font-size: 13px;
         padding: 10px 12px;
       }
+
+      .car-selection-group {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .car-selection-group select {
+        flex: 1;
+        width: 100%;
+      }
     }
   </style>
 </head>
@@ -164,12 +199,23 @@
     <form id="leadForm">
       <input type="text" name="name" id="name" placeholder="이름을 입력해주세요" required />
       <input type="tel" name="phone" id="phone" placeholder="연락처 (010-0000-0000)" required />
-      <input type="text" name="carType" id="carType" placeholder="희망 차종을 입력해주세요" />
+      
+      <!-- 차종 선택 그룹 -->
+      <label for="carCondition">희망 차종 (선택 사항)</label>
+      <div class="car-selection-group">
+        <select name="carCondition" id="carCondition">
+          <option value="">구분</option>
+          <option value="신차">신차</option>
+          <option value="중고차">중고차</option>
+        </select>
+        <input type="text" name="carType" id="carType" placeholder="차종 입력 (예: 그랜저)" />
+      </div>
 
       <label for="status">현재 상황 (선택 사항)</label>
       <select name="status" id="status">
         <option value="">선택 안함</option>
-        <option value="개인/법인사업자">개인/법인사업자</option>
+        <option value="개인사업자">개인사업자</option>
+        <option value="법인사업자">법인사업자</option>
         <option value="직장인-4대보험가입">직장인(4대보험가입)</option>
         <option value="소득증빙불가-프리랜서/무직/주부">소득증빙X(프리랜서, 무직, 주부 등)</option>
       </select>
@@ -197,7 +243,7 @@
 
   <script>
     // Google Apps Script 웹 앱 URL
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbxWOMx23HWnFS1TDi3634bMqjJ7SZ4Iwk8w8efgyCPt2Fz7Emk9pEwzhd1E5K7mAbI1/exec';
+    const scriptURL = 'Yhttps://script.google.com/macros/s/AKfycbzOAY_Ep_x7n8otNqcW3L25U5EWYqi_EVzWvISDZdyv4JYsIK9k4zvzpva-8fGmHlT8/exec'; // 여기에 새로운 웹 앱 URL을 넣어주세요
     
     // 폼 요소들 가져오기
     const form = document.getElementById('leadForm');
@@ -236,16 +282,24 @@
       // 각 필드 값 가져오기
       const nameValue = document.getElementById('name').value;
       const phoneValue = document.getElementById('phone').value;
+      const carConditionValue = document.getElementById('carCondition').value || '';
       const carTypeValue = document.getElementById('carType').value || '';
       const statusValue = document.getElementById('status').value || '';
       const availableTimeValue = document.getElementById('availableTime').value || '';
       const messageValue = document.getElementById('message').value || '';
 
+      // 차종 정보 합치기 (신차/중고차 + 차종명)
+      const fullCarType = carConditionValue && carTypeValue 
+        ? `${carConditionValue} - ${carTypeValue}` 
+        : carConditionValue || carTypeValue || '';
+
       // 디버깅용 콘솔 로그
       console.log('전송할 데이터:');
       console.log('이름:', nameValue);
       console.log('연락처:', phoneValue);
-      console.log('희망차종:', carTypeValue);
+      console.log('차량구분:', carConditionValue);
+      console.log('차종:', carTypeValue);
+      console.log('희망차종(전체):', fullCarType);
       console.log('현재상황:', statusValue);
       console.log('상담가능시간:', availableTimeValue);
       console.log('문의사항:', messageValue);
@@ -254,7 +308,7 @@
       const formData = new URLSearchParams();
       formData.append('name', nameValue);
       formData.append('phone', phoneValue);
-      formData.append('carType', carTypeValue);
+      formData.append('carType', fullCarType); // 합쳐진 차종 정보 전송
       formData.append('status', statusValue);
       formData.append('availableTime', availableTimeValue);
       formData.append('message', messageValue);
@@ -294,6 +348,7 @@
     window.addEventListener('DOMContentLoaded', function() {
       console.log('페이지 로드 완료');
       console.log('availableTime 필드 존재:', document.getElementById('availableTime') !== null);
+      console.log('carCondition 필드 존재:', document.getElementById('carCondition') !== null);
       console.log('Script URL:', scriptURL);
     });
   </script>
